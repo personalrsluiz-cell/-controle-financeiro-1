@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Meu Controle Financeiro</title>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f3f4f6;
+      color: #222;
+    }
+
+    header {
+      background: #111827;
+      color: white;
+      padding: 25px 20px;
+      text-align: center;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 26px;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 25px auto;
+      padding: 0 15px;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 15px;
+    }
+
+    .card {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .card h3 {
+      margin-top: 0;
+      font-size: 15px;
+      color: #666;
+    }
+
+    .valor {
+      font-size: 24px;
+      font-weight: bold;
+    }
+
+    .formulario {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      margin-top: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    input, select, button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 8px;
+      margin-bottom: 12px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      box-sizing: border-box;
+      font-size: 16px;
+    }
+
+    button {
+      background: #111827;
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    button:hover {
+      background: #374151;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    th, td {
+      padding: 12px;
+      border-bottom: 1px solid #eee;
+      text-align: left;
+    }
+
+    th {
+      background: #111827;
+      color: white;
+    }
+
+    .entrada {
+      color: green;
+      font-weight: bold;
+    }
+
+    .saida {
+      color: red;
+      font-weight: bold;
+    }
+
+    @media (max-width: 700px) {
+      .cards {
+        grid-template-columns: 1fr;
+      }
+
+      table {
+        font-size: 14px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <h1>💰 Meu Controle Financeiro</h1>
+  <p>Organize suas entradas e despesas</p>
+</header>
+
+<div class="container">
+
+  <div class="cards">
+    <div class="card">
+      <h3>Saldo</h3>
+      <div class="valor" id="saldo">R$ 0,00</div>
+    </div>
+
+    <div class="card">
+      <h3>Entradas</h3>
+      <div class="valor entrada" id="entradas">R$ 0,00</div>
+    </div>
+
+    <div class="card">
+      <h3>Despesas</h3>
+      <div class="valor saida" id="despesas">R$ 0,00</div>
+    </div>
+  </div>
+
+  <div class="formulario">
+    <h2>Adicionar movimentação</h2>
+
+    <input type="text" id="descricao" placeholder="Descrição">
+
+    <input type="number" id="valor" placeholder="Valor" step="0.01">
+
+    <select id="tipo">
+      <option value="entrada">Entrada</option>
+      <option value="saida">Despesa</option>
+    </select>
+
+    <button onclick="adicionar()">Adicionar</button>
+  </div>
+
+  <h2>Movimentações</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Descrição</th>
+        <th>Tipo</th>
+        <th>Valor</th>
+      </tr>
+    </thead>
+
+    <tbody id="lista"></tbody>
+  </table>
+
+</div>
+
+<script>
+
+let movimentacoes = [];
+
+function adicionar() {
+
+  const descricao = document.getElementById("descricao").value;
+  const valor = parseFloat(document.getElementById("valor").value);
+  const tipo = document.getElementById("tipo").value;
+
+  if (!descricao || !valor) {
+    alert("Preencha a descrição e o valor.");
+    return;
+  }
+
+  movimentacoes.push({
+    descricao: descricao,
+    valor: valor,
+    tipo: tipo
+  });
+
+  document.getElementById("descricao").value = "";
+  document.getElementById("valor").value = "";
+
+  atualizar();
+}
+
+function atualizar() {
+
+  let entradas = 0;
+  let despesas = 0;
+
+  const lista = document.getElementById("lista");
+
+  lista.innerHTML = "";
+
+  movimentacoes.forEach(item => {
+
+    if (item.tipo === "entrada") {
+      entradas += item.valor;
+    } else {
+      despesas += item.valor;
+    }
+
+    const linha = document.createElement("tr");
+
+    linha.innerHTML = `
+      <td>${item.descricao}</td>
+      <td>${item.tipo === "entrada" ? "Entrada" : "Despesa"}</td>
+      <td>R$ ${item.valor.toFixed(2).replace(".", ",")}</td>
+    `;
+
+    lista.appendChild(linha);
+  });
+
+  document.getElementById("entradas").innerText =
+    "R$ " + entradas.toFixed(2).replace(".", ",");
+
+  document.getElementById("despesas").innerText =
+    "R$ " + despesas.toFixed(2).replace(".", ",");
+
+  document.getElementById("saldo").innerText =
+    "R$ " + (entradas - despesas).toFixed(2).replace(".", ",");
+}
+
+</script>
+
+</body>
+</html>
