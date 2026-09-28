@@ -130,13 +130,16 @@ form{display:grid;gap:12px}input,select{width:100%;padding:12px;background:#1214
 </div>
 <script>
 const baseKey='mcf_data_v1';
-const usuarioAtual=()=>JSON.parse(localStorage.getItem('mcf_usuario')||'null');
+
+let emailLogado='';
+
 const dataKey=()=>{
-  const u=usuarioAtual();
-  return u?.email ? baseKey+'_'+encodeURIComponent(u.email.trim().toLowerCase()) : baseKey;
+  return emailLogado
+    ? baseKey+'_'+encodeURIComponent(emailLogado.trim().toLowerCase())
+    : baseKey;
 };
 
-let db=JSON.parse(localStorage.getItem(dataKey())||'{"lanc":[],"contas":[],"cartoes":[],"metas":[]}');
+let db=JSON.parse(localStorage.getItem(baseKey)||'{"lanc":[],"contas":[],"cartoes":[],"metas":[]}');
 
 const money=v=>new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(v||0);
 
@@ -227,6 +230,7 @@ function criarConta(){
   localStorage.setItem('mcf_usuarios',JSON.stringify(usuarios));
 
   const chave=baseKey+'_'+encodeURIComponent(email);
+  emailLogado=email;
   localStorage.setItem(chave,JSON.stringify({
     lanc:[],
     contas:[],
