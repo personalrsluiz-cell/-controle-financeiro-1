@@ -144,6 +144,7 @@ const save=()=>{
   localStorage.setItem(dataKey(),JSON.stringify(db));
   render()
 };
+  function render(){
  let ent=db.lanc.filter(x=>x.tipo==='entrada').reduce((a,x)=>a+x.valor,0), des=db.lanc.filter(x=>x.tipo==='despesa').reduce((a,x)=>a+x.valor,0);
  let pend=db.contas.filter(x=>x.status==='pendente').reduce((a,x)=>a+x.valor,0);
  saldo.textContent=money(ent-des);entradas.textContent=money(ent);despesas.textContent=money(des);pendentes.textContent=money(pend);
