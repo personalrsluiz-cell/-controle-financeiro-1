@@ -588,13 +588,77 @@ function entrar(){
     .style.display='block';
 
   render();
+  criarAreaUsuario();
 }
 
 
 /* =========================
    LANÇAMENTOS
 ========================= */
+function criarAreaUsuario(){
 
+  let area=document.getElementById('areaUsuario');
+
+  if(area) return;
+
+  area=document.createElement('div');
+
+  area.id='areaUsuario';
+
+  area.style.cssText=
+    'display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 18px;padding:12px 15px;background:#1b1e21;border:1px solid #30353a;border-radius:12px;';
+
+  area.innerHTML=`
+    <div style="font-size:14px;color:#9da4aa">
+      👤 ${emailLogado}
+    </div>
+
+    <button
+      type="button"
+      onclick="sair()"
+      style="background:#ff5c5c;color:#fff;border:0;border-radius:10px;padding:10px 14px;font-weight:700;cursor:pointer">
+      🚪 Sair
+    </button>
+  `;
+
+  const app=document.getElementById('app');
+
+  app.insertBefore(area,app.firstChild);
+}
+
+
+function sair(){
+
+  emailLogado='';
+
+  db={
+    lanc:[],
+    contas:[],
+    cartoes:[],
+    metas:[]
+  };
+
+  const area=document.getElementById('areaUsuario');
+
+  if(area){
+    area.remove();
+  }
+
+  document.getElementById('app')
+    .style.display='none';
+
+  document.getElementById('login')
+    .style.display='block';
+
+  document.getElementById('loginEmail')
+    .value='';
+
+  document.getElementById('loginPassword')
+    .value='';
+
+  document.getElementById('loginMsg')
+    .textContent='';
+}
 document
   .getElementById('formLanc')
   .onsubmit=e=>{
