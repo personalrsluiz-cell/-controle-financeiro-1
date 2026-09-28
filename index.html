@@ -281,7 +281,7 @@ function entrar(){
    * caso os dados financeiros já existam.
    */
   const chaveUsuario=baseKey+'_'+encodeURIComponent(email);
-
+emailLogado=email;
   if(!usuarios[email] && localStorage.getItem(chaveUsuario)){
     usuarios[email]={
       email:email,
