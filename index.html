@@ -20,10 +20,77 @@ form{display:grid;gap:12px}input,select{width:100%;padding:12px;background:#1214
 .bar{height:9px;background:#30353a;border-radius:10px;overflow:hidden}.bar i{display:block;height:100%;background:var(--green)}
 .empty{color:var(--muted);padding:20px 0;text-align:center}
 @media(max-width:800px){.grid{grid-template-columns:1fr 1fr}.two{grid-template-columns:1fr}}@media(max-width:500px){.app{padding:15px}.grid{grid-template-columns:1fr}.formgrid{grid-template-columns:1fr}.top{align-items:flex-start;gap:10px;flex-direction:column}}
+.login-screen{
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+  background:#111315;
+}
+
+.login-box{
+  width:min(430px,100%);
+  background:#1b1e21;
+  border:1px solid #30353a;
+  border-radius:18px;
+  padding:28px;
+  box-shadow:0 20px 50px rgba(0,0,0,.35);
+}
+
+.login-box h1{
+  margin:0 0 8px;
+  font-size:25px;
+  color:#fff;
+}
+
+.login-box p{
+  color:#9ca3af;
+  margin:0 0 22px;
+}
+
+.login-box input{
+  width:100%;
+  margin-bottom:12px;
+}
+
+.login-box button{
+  width:100%;
+  margin-top:8px;
+}
+
+.btn-secundario{
+  background:#30353a !important;
+  color:#fff !important;
+}
+
+#loginMsg{
+  margin-top:15px;
+  color:#9ca3af;
+  text-align:center;
+}
 </style>
 </head>
 <body>
-<div class="app">
+
+<div id="login" class="login-screen">
+  <div class="login-box">
+    <h1>💰 Meu Controle Financeiro</h1>
+    <p>Entre para acessar seu controle</p>
+
+    <input id="loginEmail" type="email" placeholder="Seu e-mail">
+
+    <input id="loginPassword" type="password" placeholder="Sua senha">
+
+    <button onclick="entrar()">Entrar</button>
+
+    <button class="btn-secundario" onclick="criarConta()">Criar conta</button>
+
+    <div id="loginMsg"></div>
+  </div>
+</div>
+
+<div class="app" id="app">
 <header class="top"><div class="brand"><h1>💰 Meu Controle Financeiro</h1><span>Planeje hoje. Gaste melhor amanhã.</span></div><button onclick="show('lancar')">+ Lançamento</button></header>
 <nav id="nav">
 <button class="active" onclick="show('inicio')">Início</button><button onclick="show('lancar')">Lançamentos</button><button onclick="show('contas')">Contas</button><button onclick="show('cartoes')">Cartões</button><button onclick="show('metas')">Metas</button><button onclick="show('relatorios')">Relatórios</button>
