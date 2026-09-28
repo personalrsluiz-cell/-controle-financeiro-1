@@ -129,9 +129,17 @@ form{display:grid;gap:12px}input,select{width:100%;padding:12px;background:#1214
 <section id="relatorios" class="page"><div class="grid"><div class="card"><div class="label">Taxa de economia</div><div class="value" id="taxa">0%</div></div><div class="card"><div class="label">Maior categoria</div><div class="value" id="maior">—</div></div></div><div class="card section"><h2>Despesas por categoria</h2><div id="relCats"></div></div></section>
 </div>
 <script>
+<script>
 const baseKey='mcf_data_v1';
 
 let emailLogado='';
+
+const dadosVazios={
+  lanc:[],
+  contas:[],
+  cartoes:[],
+  metas:[]
+};
 
 const dataKey=()=>{
   return emailLogado
@@ -139,205 +147,558 @@ const dataKey=()=>{
     : baseKey;
 };
 
-let db=JSON.parse(localStorage.getItem(baseKey)||'{"lanc":[],"contas":[],"cartoes":[],"metas":[]}');
+let db=JSON.parse(
+  localStorage.getItem(baseKey) ||
+  JSON.stringify(dadosVazios)
+);
 
-const money=v=>new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(v||0);
+const money=v=>new Intl.NumberFormat(
+  'pt-BR',
+  {
+    style:'currency',
+    currency:'BRL'
+  }
+).format(v||0);
 
 const save=()=>{
-  localStorage.setItem(dataKey(),JSON.stringify(db));
-  render()
-};
-  function render(){
- let ent=db.lanc.filter(x=>x.tipo==='entrada').reduce((a,x)=>a+x.valor,0), des=db.lanc.filter(x=>x.tipo==='despesa').reduce((a,x)=>a+x.valor,0);
- let pend=db.contas.filter(x=>x.status==='pendente').reduce((a,x)=>a+x.valor,0);
- saldo.textContent=money(ent-des);entradas.textContent=money(ent);despesas.textContent=money(des);pendentes.textContent=money(pend);
- const rows=db.lanc.slice(-8).reverse().map(x=>`<tr><td>${x.data}</td><td>${x.desc}</td><td>${x.cat}</td><td class="${x.tipo==='entrada'?'green':'red'}">${x.tipo==='entrada'?'+':'-'} ${money(x.valor)}</td></tr>`).join('');
- recent.innerHTML=rows?`<table><tr><th>Data</th><th>Descrição</th><th>Categoria</th><th>Valor</th></tr>${rows}</table>`:'<div class="empty">Nenhum lançamento ainda.</div>';
- history.innerHTML=db.lanc.length?`<table><tr><th>Data</th><th>Descrição</th><th>Tipo</th><th>Valor</th></tr>${db.lanc.slice().reverse().map(x=>`<tr><td>${x.data}</td><td>${x.desc}</td><td>${x.tipo}</td><td class="${x.tipo==='entrada'?'green':'red'}">${money(x.valor)}</td></tr>`).join('')}</table>`:'<div class="empty">Cadastre seu primeiro lançamento.</div>';
- let c={};db.lanc.filter(x=>x.tipo==='despesa').forEach(x=>c[x.cat]=(c[x.cat]||0)+x.valor);let total=Object.values(c).reduce((a,b)=>a+b,0);
- cats.innerHTML=Object.entries(c).sort((a,b)=>b[1]-a[1]).map(([n,v])=>`<p><b>${n}</b> — ${money(v)}<div class="bar"><i style="width:${total?v/total*100:0}%"></i></div></p>`).join('')||'<div class="empty">Sem despesas.</div>';
- relCats.innerHTML=cats.innerHTML;let mx=Object.entries(c).sort((a,b)=>b[1]-a[1])[0];maior.textContent=mx?mx[0]:'—';taxa.textContent=ent?((ent-des)/ent*100).toFixed(1)+'%':'0%';
- listaContas.innerHTML=db.contas.length?`<table><tr><th>Conta</th><th>Valor</th><th>Vencimento</th><th>Status</th></tr>${db.contas.map(x=>`<tr><td>${x.desc}</td><td>${money(x.valor)}</td><td>${x.data}</td><td class="${x.status==='pago'?'green':'yellow'}">${x.status}</td></tr>`).join('')}</table>`:'<div class="empty">Nenhuma conta cadastrada.</div>';
- listaCartoes.innerHTML=db.cartoes.length?db.cartoes.map(x=>`<div style="margin:15px 0"><b>💳 ${x.nome}</b><div class="label">Limite: ${money(x.limite)}</div></div>`).join(''):'<div class="empty">Nenhum cartão cadastrado.</div>';
- listaMetas.innerHTML=db.metas.length?db.metas.map(x=>{let p=Math.min(100,x.atual/x.alvo*100);return `<div class="card" style="margin-bottom:12px"><b>🎯 ${x.nome}</b><div class="label">${money(x.atual)} de ${money(x.alvo)} ${x.prazo?'· prazo '+x.prazo:''}</div><div class="bar" style="margin-top:10px"><i style="width:${p}%"></i></div><div class="label" style="margin-top:6px">${p.toFixed(0)}% concluído</div></div>`}).join(''):'<div class="card empty">Crie sua primeira meta.</div>';
-}function entrar(){
-  const email = document.getElementById('loginEmail').value.trim();
-  const senha = document.getElementById('loginPassword').value;
-
-  if(!email || !senha){
-    document.getElementById('loginMsg').textContent =
-      'Digite seu e-mail e sua senha.';
-    return;
-  }
-const usuario = JSON.parse(localStorage.getItem('mcf_usuario'));
-
-if (!usuario || email !== usuario.email || senha !== usuario.senha) {
-  document.getElementById('loginMsg').textContent =
-    'E-mail ou senha incorretos.';
-  return;
-}
-  document.getElementById('login').style.display = 'none';
-  document.getElementById('app').style.display = 'block';
-
+  localStorage.setItem(
+    dataKey(),
+    JSON.stringify(db)
+  );
   render();
+};
+
+function render(){
+
+  let ent=db.lanc
+    .filter(x=>x.tipo==='entrada')
+    .reduce((a,x)=>a+x.valor,0);
+
+  let des=db.lanc
+    .filter(x=>x.tipo==='despesa')
+    .reduce((a,x)=>a+x.valor,0);
+
+  let pend=db.contas
+    .filter(x=>x.status==='pendente')
+    .reduce((a,x)=>a+x.valor,0);
+
+  saldo.textContent=money(ent-des);
+  entradas.textContent=money(ent);
+  despesas.textContent=money(des);
+  pendentes.textContent=money(pend);
+
+  const rows=db.lanc
+    .slice(-8)
+    .reverse()
+    .map(x=>`
+      <tr>
+        <td>${x.data}</td>
+        <td>${x.desc}</td>
+        <td>${x.cat}</td>
+        <td class="${x.tipo==='entrada'?'green':'red'}">
+          ${x.tipo==='entrada'?'+':'-'} ${money(x.valor)}
+        </td>
+      </tr>
+    `)
+    .join('');
+
+  recent.innerHTML=rows
+    ? `<table>
+        <tr>
+          <th>Data</th>
+          <th>Descrição</th>
+          <th>Categoria</th>
+          <th>Valor</th>
+        </tr>
+        ${rows}
+      </table>`
+    : '<div class="empty">Nenhum lançamento ainda.</div>';
+
+  history.innerHTML=db.lanc.length
+    ? `<table>
+        <tr>
+          <th>Data</th>
+          <th>Descrição</th>
+          <th>Tipo</th>
+          <th>Valor</th>
+        </tr>
+        ${db.lanc.slice().reverse().map(x=>`
+          <tr>
+            <td>${x.data}</td>
+            <td>${x.desc}</td>
+            <td>${x.tipo}</td>
+            <td class="${x.tipo==='entrada'?'green':'red'}">
+              ${money(x.valor)}
+            </td>
+          </tr>
+        `).join('')}
+      </table>`
+    : '<div class="empty">Cadastre seu primeiro lançamento.</div>';
+
+  let c={};
+
+  db.lanc
+    .filter(x=>x.tipo==='despesa')
+    .forEach(x=>{
+      c[x.cat]=(c[x.cat]||0)+x.valor;
+    });
+
+  let total=Object.values(c)
+    .reduce((a,b)=>a+b,0);
+
+  cats.innerHTML=
+    Object.entries(c)
+      .sort((a,b)=>b[1]-a[1])
+      .map(([n,v])=>`
+        <p>
+          <b>${n}</b> — ${money(v)}
+          <div class="bar">
+            <i style="width:${total?v/total*100:0}%"></i>
+          </div>
+        </p>
+      `)
+      .join('')
+    || '<div class="empty">Sem despesas.</div>';
+
+  relCats.innerHTML=cats.innerHTML;
+
+  let mx=Object.entries(c)
+    .sort((a,b)=>b[1]-a[1])[0];
+
+  maior.textContent=mx?mx[0]:'—';
+
+  taxa.textContent=ent
+    ? ((ent-des)/ent*100).toFixed(1)+'%'
+    : '0%';
+
+  listaContas.innerHTML=db.contas.length
+    ? `<table>
+        <tr>
+          <th>Conta</th>
+          <th>Valor</th>
+          <th>Vencimento</th>
+          <th>Status</th>
+        </tr>
+        ${db.contas.map(x=>`
+          <tr>
+            <td>${x.desc}</td>
+            <td>${money(x.valor)}</td>
+            <td>${x.data}</td>
+            <td class="${x.status==='pago'?'green':'yellow'}">
+              ${x.status}
+            </td>
+          </tr>
+        `).join('')}
+      </table>`
+    : '<div class="empty">Nenhuma conta cadastrada.</div>';
+
+  listaCartoes.innerHTML=db.cartoes.length
+    ? db.cartoes.map(x=>`
+        <div style="margin:15px 0">
+          <b>💳 ${x.nome}</b>
+          <div class="label">
+            Limite: ${money(x.limite)}
+          </div>
+        </div>
+      `).join('')
+    : '<div class="empty">Nenhum cartão cadastrado.</div>';
+
+  listaMetas.innerHTML=db.metas.length
+    ? db.metas.map(x=>{
+        let p=x.alvo
+          ? Math.min(100,x.atual/x.alvo*100)
+          : 0;
+
+        return `
+          <div class="card" style="margin-bottom:12px">
+            <b>🎯 ${x.nome}</b>
+
+            <div class="label">
+              ${money(x.atual)}
+              de
+              ${money(x.alvo)}
+              ${x.prazo?'· prazo '+x.prazo:''}
+            </div>
+
+            <div class="bar" style="margin-top:10px">
+              <i style="width:${p}%"></i>
+            </div>
+
+            <div class="label" style="margin-top:6px">
+              ${p.toFixed(0)}% concluído
+            </div>
+          </div>
+        `;
+      }).join('')
+    : '<div class="card empty">Crie sua primeira meta.</div>';
 }
-document.getElementById('formLanc').onsubmit=e=>{e.preventDefault();db.lanc.push({tipo:tipo.value,desc:desc.value,valor:+valor.value,data:data.value,cat:cat.value,pag:pag.value});e.target.reset();data.value=new Date().toISOString().slice(0,10);save()};
-document.getElementById('formConta').onsubmit=e=>{e.preventDefault();db.contas.push({desc:contaDesc.value,valor:+contaValor.value,data:contaData.value,status:contaStatus.value});e.target.reset();save()};
-document.getElementById('formCartao').onsubmit=e=>{e.preventDefault();db.cartoes.push({nome:cartaoNome.value,limite:+cartaoLimite.value});e.target.reset();save()};
-document.getElementById('formMeta').onsubmit=e=>{e.preventDefault();db.metas.push({nome:metaNome.value,alvo:+metaAlvo.value,atual:+metaAtual.value,prazo:metaPrazo.value});e.target.reset();save()};
-data.value=new Date().toISOString().slice(0,10);render();
-textContent =
-        'Conta criada com sucesso!';
+
+
+/* =========================
+   CRIAR CONTA
+========================= */
+
 function criarConta(){
-  const email=document.getElementById('loginEmail').value.trim().toLowerCase();
-  const senha=document.getElementById('loginPassword').value.trim();
-  const msg=document.getElementById('loginMsg');
+
+  const email=document
+    .getElementById('loginEmail')
+    .value
+    .trim()
+    .toLowerCase();
+
+  const senha=document
+    .getElementById('loginPassword')
+    .value
+    .trim();
+
+  const msg=document
+    .getElementById('loginMsg');
 
   if(!email || !senha){
-    msg.textContent='Digite seu e-mail e sua senha para criar a conta.';
+    msg.textContent=
+      'Digite seu e-mail e sua senha para criar a conta.';
     return;
   }
 
   if(senha.length<6){
-    msg.textContent='A senha deve ter pelo menos 6 caracteres.';
+    msg.textContent=
+      'A senha deve ter pelo menos 6 caracteres.';
     return;
   }
 
-  const usuarios=JSON.parse(localStorage.getItem('mcf_usuarios')||'{}');
-
-  if(usuarios[email]){
-  usuarios[email].senha=senha;
-
-  localStorage.setItem(
-    'mcf_usuarios',
-    JSON.stringify(usuarios)
+  const usuarios=JSON.parse(
+    localStorage.getItem('mcf_usuarios')||'{}'
   );
 
-  msg.textContent='Senha atualizada com sucesso!';
-
-  setTimeout(()=>{
-    msg.textContent='Agora você pode entrar com seus dados.';
-  },1500);
-
-  return;
-}
+  if(usuarios[email]){
+    msg.textContent=
+      'Esta conta já existe. Use o botão Entrar.';
+    return;
+  }
 
   usuarios[email]={
     email:email,
     senha:senha
   };
 
-  localStorage.setItem('mcf_usuarios',JSON.stringify(usuarios));
+  localStorage.setItem(
+    'mcf_usuarios',
+    JSON.stringify(usuarios)
+  );
 
-  const chave=baseKey+'_'+encodeURIComponent(email);
-  emailLogado=email;
-  localStorage.setItem(chave,JSON.stringify({
-    lanc:[],
-    contas:[],
-    cartoes:[],
-    metas:[]
-  }));
+  const chave=
+    baseKey+'_'+encodeURIComponent(email);
 
-  msg.textContent='Conta criada com sucesso!';
+  localStorage.setItem(
+    chave,
+    JSON.stringify(dadosVazios)
+  );
+
+  msg.textContent=
+    'Conta criada com sucesso!';
 
   setTimeout(()=>{
-    msg.textContent='Agora você pode entrar com seus dados.';
+    msg.textContent=
+      'Agora você pode entrar com seus dados.';
   },1500);
 }
 
 
+/* =========================
+   ENTRAR
+========================= */
+
 function entrar(){
-  const email=document.getElementById('loginEmail').value.trim().toLowerCase();
-  const senha=document.getElementById('loginPassword').value;
-  const msg=document.getElementById('loginMsg');
+
+  const email=document
+    .getElementById('loginEmail')
+    .value
+    .trim()
+    .toLowerCase();
+
+  const senha=document
+    .getElementById('loginPassword')
+    .value;
+
+  const msg=document
+    .getElementById('loginMsg');
 
   if(!email || !senha){
-    msg.textContent='Digite seu e-mail e sua senha.';
+    msg.textContent=
+      'Digite seu e-mail e sua senha.';
     return;
   }
 
-  let usuarios=JSON.parse(localStorage.getItem('mcf_usuarios')||'{}');
+  let usuarios=JSON.parse(
+    localStorage.getItem('mcf_usuarios')||'{}'
+  );
 
-  /*
-   * Migração da conta antiga para o novo sistema
-   */
-  const usuarioAntigo=JSON.parse(localStorage.getItem('mcf_usuario')||'null');
 
-  if(usuarioAntigo && usuarioAntigo.email){
-    const emailAntigo=usuarioAntigo.email.trim().toLowerCase();
+  /* =========================
+     RECUPERA CONTA ANTIGA
+  ========================= */
+
+  const usuarioAntigo=JSON.parse(
+    localStorage.getItem('mcf_usuario')||'null'
+  );
+
+  if(
+    usuarioAntigo &&
+    usuarioAntigo.email
+  ){
+
+    const emailAntigo=
+      usuarioAntigo.email
+      .trim()
+      .toLowerCase();
 
     if(!usuarios[emailAntigo]){
+
       usuarios[emailAntigo]={
         email:emailAntigo,
         senha:usuarioAntigo.senha
       };
 
-      localStorage.setItem('mcf_usuarios',JSON.stringify(usuarios));
+      localStorage.setItem(
+        'mcf_usuarios',
+        JSON.stringify(usuarios)
+      );
     }
   }
 
-  /*
-   * Recupera a conta antiga do usuário principal,
-   * caso os dados financeiros já existam.
-   */
-  const emailNormalizado=email.trim().toLowerCase();
-const chaveUsuario=baseKey+'_'+encodeURIComponent(emailNormalizado);
-emailLogado=emailNormalizado;
 
-/* Migra os dados que ficaram vinculados ao e-mail antigo */
-const chaveEmailAntigo=baseKey+'_'+encodeURIComponent('regi.luiz@hotmail.com');
-const dadosEmailAntigo=localStorage.getItem(chaveEmailAntigo);
+  const emailNormalizado=email;
 
-if(emailNormalizado==='personalsrluiz@gmail.com' && dadosEmailAntigo){
-  localStorage.setItem(chaveUsuario,dadosEmailAntigo);
-}
+  const chaveUsuario=
+    baseKey+'_'+encodeURIComponent(
+      emailNormalizado
+    );
 
-if(!usuarios[emailNormalizado] &&
-localStorage.getItem(chaveUsuario)){
-  usuarios[emailNormalizado]={
-    email:emailNormalizado,
-    senha:senha
-  };
-}
+  emailLogado=emailNormalizado;
 
-localStorage.setItem('mcf_usuarios',JSON.stringify(usuarios));
 
-  const usuario=usuarios[email];
+  /* =========================
+     MIGRAÇÃO DOS DADOS ANTIGOS
+     SEM SOBRESCREVER DADOS
+  ========================= */
 
-  if(!usuario || senha!==usuario.senha){
-    msg.textContent='E-mail ou senha incorretos.';
-    return;
-  }
-  /* Corrige os dados antigos que foram vinculados ao e-mail errado */
-const chaveErrada=baseKey+'_'+encodeURIComponent('regi.luiz@hotmail.com');
-const chaveCerta=baseKey+'_'+encodeURIComponent('personalsrluiz@gmail.com');
+  const chavesAntigas=[
+    baseKey,
+    baseKey+'_'+
+      encodeURIComponent('regi.luiz@hotmail.com')
+  ];
 
-if(email==='personalsrluiz@gmail.com' &&
-   !localStorage.getItem(chaveCerta) &&
-   localStorage.getItem(chaveErrada)){
-  localStorage.setItem(chaveCerta,localStorage.getItem(chaveErrada));
-  localStorage.removeItem(chaveErrada);
-}
-const dadosAntigos=localStorage.getItem(baseKey);
-const dadosUsuario=localStorage.getItem(chaveUsuario);
-
-if(!dadosUsuario && dadosAntigos){
-  localStorage.setItem(chaveUsuario,dadosAntigos);
-  localStorage.removeItem(baseKey);
-}
-  /*
-   * Carrega somente os dados financeiros deste usuário.
-   */
-  db=JSON.parse(
+  let dadosUsuario=JSON.parse(
     localStorage.getItem(chaveUsuario) ||
-    '{"lanc":[],"contas":[],"cartoes":[],"metas":[]}'
+    JSON.stringify(dadosVazios)
   );
 
-  document.getElementById('login').style.display='none';
-  document.getElementById('app').style.display='block';
+  let houveMigracao=false;
+
+  chavesAntigas.forEach(chave=>{
+
+    if(chave===chaveUsuario){
+      return;
+    }
+
+    const bruto=
+      localStorage.getItem(chave);
+
+    if(!bruto){
+      return;
+    }
+
+    try{
+
+      const antigo=
+        JSON.parse(bruto);
+
+      ['lanc','contas','cartoes','metas']
+        .forEach(tipo=>{
+
+          (antigo[tipo]||[]).forEach(item=>{
+
+            const existe=
+              dadosUsuario[tipo].some(
+                x=>JSON.stringify(x)===
+                   JSON.stringify(item)
+              );
+
+            if(!existe){
+
+              dadosUsuario[tipo].push(item);
+
+              houveMigracao=true;
+            }
+          });
+
+        });
+
+    }catch(e){
+      console.log(
+        'Erro ao migrar dados:',
+        e
+      );
+    }
+
+  });
+
+
+  if(houveMigracao){
+
+    localStorage.setItem(
+      chaveUsuario,
+      JSON.stringify(dadosUsuario)
+    );
+  }
+
+
+  /* =========================
+     VERIFICA LOGIN
+  ========================= */
+
+  const usuario=
+    usuarios[emailNormalizado];
+
+  if(
+    !usuario ||
+    senha!==usuario.senha
+  ){
+
+    msg.textContent=
+      'E-mail ou senha incorretos.';
+
+    return;
+  }
+
+
+  /* =========================
+     CARREGA DADOS DO USUÁRIO
+  ========================= */
+
+  db=JSON.parse(
+    localStorage.getItem(chaveUsuario) ||
+    JSON.stringify(dadosVazios)
+  );
+
+
+  document.getElementById('login')
+    .style.display='none';
+
+  document.getElementById('app')
+    .style.display='block';
 
   render();
 }
+
+
+/* =========================
+   LANÇAMENTOS
+========================= */
+
+document
+  .getElementById('formLanc')
+  .onsubmit=e=>{
+
+    e.preventDefault();
+
+    db.lanc.push({
+      tipo:tipo.value,
+      desc:desc.value,
+      valor:+valor.value,
+      data:data.value,
+      cat:cat.value,
+      pag:pag.value
+    });
+
+    e.target.reset();
+
+    data.value=
+      new Date()
+      .toISOString()
+      .slice(0,10);
+
+    save();
+  };
+
+
+/* =========================
+   CONTAS
+========================= */
+
+document
+  .getElementById('formConta')
+  .onsubmit=e=>{
+
+    e.preventDefault();
+
+    db.contas.push({
+      desc:contaDesc.value,
+      valor:+contaValor.value,
+      data:contaData.value,
+      status:contaStatus.value
+    });
+
+    e.target.reset();
+
+    save();
+  };
+
+
+/* =========================
+   CARTÕES
+========================= */
+
+document
+  .getElementById('formCartao')
+  .onsubmit=e=>{
+
+    e.preventDefault();
+
+    db.cartoes.push({
+      nome:cartaoNome.value,
+      limite:+cartaoLimite.value
+    });
+
+    e.target.reset();
+
+    save();
+  };
+
+
+/* =========================
+   METAS
+========================= */
+
+document
+  .getElementById('formMeta')
+  .onsubmit=e=>{
+
+    e.preventDefault();
+
+    db.metas.push({
+      nome:metaNome.value,
+      alvo:+metaAlvo.value,
+      atual:+metaAtual.value,
+      prazo:metaPrazo.value
+    });
+
+    e.target.reset();
+
+    save();
+  };
+
+
+/* =========================
+   DATA PADRÃO
+========================= */
+
+data.value=
+  new Date()
+  .toISOString()
+  .slice(0,10);
+
+</script>
 </script>
 </body>
 </html>
