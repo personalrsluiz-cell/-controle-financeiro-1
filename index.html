@@ -7,7 +7,12 @@
 <style>
 :root{--bg:#111315;--card:#1b1e21;--card2:#24282c;--text:#f4f5f6;--muted:#9da4aa;--green:#35d07f;--red:#ff5c5c;--yellow:#f4c95d;--line:#30353a}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,Arial,sans-serif}
-.app{max-width:1150px;margin:auto;padding:24px}.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:22px}
+.app{
+  max-width:1150px;
+  margin:auto;
+  padding:20px;
+  display:none;
+}
 .brand h1{margin:0;font-size:25px}.brand span{color:var(--muted);font-size:13px}
 button{border:0;border-radius:10px;padding:11px 15px;background:var(--green);color:#07120c;font-weight:800;cursor:pointer}
 nav{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}nav button{background:var(--card2);color:var(--text)}nav button.active{background:var(--green);color:#07120c}
@@ -142,6 +147,20 @@ function render(){
  listaContas.innerHTML=db.contas.length?`<table><tr><th>Conta</th><th>Valor</th><th>Vencimento</th><th>Status</th></tr>${db.contas.map(x=>`<tr><td>${x.desc}</td><td>${money(x.valor)}</td><td>${x.data}</td><td class="${x.status==='pago'?'green':'yellow'}">${x.status}</td></tr>`).join('')}</table>`:'<div class="empty">Nenhuma conta cadastrada.</div>';
  listaCartoes.innerHTML=db.cartoes.length?db.cartoes.map(x=>`<div style="margin:15px 0"><b>💳 ${x.nome}</b><div class="label">Limite: ${money(x.limite)}</div></div>`).join(''):'<div class="empty">Nenhum cartão cadastrado.</div>';
  listaMetas.innerHTML=db.metas.length?db.metas.map(x=>{let p=Math.min(100,x.atual/x.alvo*100);return `<div class="card" style="margin-bottom:12px"><b>🎯 ${x.nome}</b><div class="label">${money(x.atual)} de ${money(x.alvo)} ${x.prazo?'· prazo '+x.prazo:''}</div><div class="bar" style="margin-top:10px"><i style="width:${p}%"></i></div><div class="label" style="margin-top:6px">${p.toFixed(0)}% concluído</div></div>`}).join(''):'<div class="card empty">Crie sua primeira meta.</div>';
+}function entrar(){
+  const email = document.getElementById('loginEmail').value.trim();
+  const senha = document.getElementById('loginPassword').value;
+
+  if(!email || !senha){
+    document.getElementById('loginMsg').textContent =
+      'Digite seu e-mail e sua senha.';
+    return;
+  }
+
+  document.getElementById('login').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+
+  render();
 }
 document.getElementById('formLanc').onsubmit=e=>{e.preventDefault();db.lanc.push({tipo:tipo.value,desc:desc.value,valor:+valor.value,data:data.value,cat:cat.value,pag:pag.value});e.target.reset();data.value=new Date().toISOString().slice(0,10);save()};
 document.getElementById('formConta').onsubmit=e=>{e.preventDefault();db.contas.push({desc:contaDesc.value,valor:+contaValor.value,data:contaData.value,status:contaStatus.value});e.target.reset();save()};
