@@ -186,33 +186,52 @@ data.value=new Date().toISOString().slice(0,10);render();
 textContent =
         'Conta criada com sucesso!';
 function criarConta(){
-    const email = document.getElementById('loginEmail').value.trim();
-    const senha = document.getElementById('loginPassword').value.trim();
-    const msg = document.getElementById('loginMsg');
+  const email=document.getElementById('loginEmail').value.trim().toLowerCase();
+  const senha=document.getElementById('loginPassword').value.trim();
+  const msg=document.getElementById('loginMsg');
 
-    if(!email || !senha){
-        msg.textContent = 'Digite seu e-mail e sua senha para criar a conta.';
-        return;
-    }
+  if(!email || !senha){
+    msg.textContent='Digite seu e-mail e sua senha para criar a conta.';
+    return;
+  }
 
-    if(senha.length < 6){
-        msg.textContent = 'A senha deve ter pelo menos 6 caracteres.';
-        return;
-    }
+  if(senha.length<6){
+    msg.textContent='A senha deve ter pelo menos 6 caracteres.';
+    return;
+  }
 
-    localStorage.setItem('mcf_usuario', JSON.stringify({
-        email: email,
-        senha: senha
-    }));
+  const usuarios=JSON.parse(localStorage.getItem('mcf_usuarios')||'{}');
 
-    msg.textContent = 'Conta criada com sucesso!';
+  if(usuarios[email]){
+    msg.textContent='Este e-mail já possui uma conta.';
+    return;
+  }
 
-    setTimeout(() => {
-        msg.textContent = 'Agora você pode entrar com seus dados.';
-    }, 1500);
+  usuarios[email]={
+    email:email,
+    senha:senha
+  };
+
+  localStorage.setItem('mcf_usuarios',JSON.stringify(usuarios));
+
+  const chave=baseKey+'_'+encodeURIComponent(email);
+  localStorage.setItem(chave,JSON.stringify({
+    lanc:[],
+    contas:[],
+    cartoes:[],
+    metas:[]
+  }));
+
+  msg.textContent='Conta criada com sucesso!';
+
+  setTimeout(()=>{
+    msg.textContent='Agora você pode entrar com seus dados.';
+  },1500);
 }
- function entrar(){
-  const email=document.getElementById('loginEmail').value.trim();
+
+
+function entrar(){
+  const email=document.getElementById('loginEmail').value.trim().toLowerCase();
   const senha=document.getElementById('loginPassword').value;
   const msg=document.getElementById('loginMsg');
 
@@ -221,29 +240,61 @@ function criarConta(){
     return;
   }
 
-  const usuario=JSON.parse(localStorage.getItem('mcf_usuario')||'null');
+  let usuarios=JSON.parse(localStorage.getItem('mcf_usuarios')||'{}');
 
-  if(!usuario || email!==usuario.email || senha!==usuario.senha){
+  /*
+   * Migração da conta antiga para o novo sistema
+   */
+  const usuarioAntigo=JSON.parse(localStorage.getItem('mcf_usuario')||'null');
+
+  if(usuarioAntigo && usuarioAntigo.email){
+    const emailAntigo=usuarioAntigo.email.trim().toLowerCase();
+
+    if(!usuarios[emailAntigo]){
+      usuarios[emailAntigo]={
+        email:emailAntigo,
+        senha:usuarioAntigo.senha
+      };
+
+      localStorage.setItem('mcf_usuarios',JSON.stringify(usuarios));
+    }
+  }
+
+  /*
+   * Recupera a conta antiga do usuário principal,
+   * caso os dados financeiros já existam.
+   */
+  const chaveUsuario=baseKey+'_'+encodeURIComponent(email);
+
+  if(!usuarios[email] && localStorage.getItem(chaveUsuario)){
+    usuarios[email]={
+      email:email,
+      senha:senha
+    };
+
+    localStorage.setItem('mcf_usuarios',JSON.stringify(usuarios));
+  }
+
+  const usuario=usuarios[email];
+
+  if(!usuario || senha!==usuario.senha){
     msg.textContent='E-mail ou senha incorretos.';
     return;
   }
 
-  const chaveUsuario=baseKey+'_'+encodeURIComponent(email.trim().toLowerCase());
-  const dadosUsuario=localStorage.getItem(chaveUsuario);
-  const dadosAntigos=localStorage.getItem(baseKey);
-
-  if(!dadosUsuario && dadosAntigos){
-    localStorage.setItem(chaveUsuario,dadosAntigos);
-    localStorage.removeItem(baseKey);
-  }
-
-  db=JSON.parse(localStorage.getItem(chaveUsuario)||'{"lanc":[],"contas":[],"cartoes":[],"metas":[]}');
+  /*
+   * Carrega somente os dados financeiros deste usuário.
+   */
+  db=JSON.parse(
+    localStorage.getItem(chaveUsuario) ||
+    '{"lanc":[],"contas":[],"cartoes":[],"metas":[]}'
+  );
 
   document.getElementById('login').style.display='none';
   document.getElementById('app').style.display='block';
 
   render();
-} 
+}
 </script>
 </body>
 </html>
