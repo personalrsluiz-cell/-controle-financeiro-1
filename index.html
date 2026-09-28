@@ -146,10 +146,12 @@ const dataKey=()=>{
     : baseKey;
 };
 
-let db=JSON.parse(
-  localStorage.getItem(baseKey) ||
-  JSON.stringify(dadosVazios)
-);
+let db={
+  lanc:[],
+  contas:[],
+  cartoes:[],
+  metas:[]
+};
 
 const money=v=>new Intl.NumberFormat(
   'pt-BR',
