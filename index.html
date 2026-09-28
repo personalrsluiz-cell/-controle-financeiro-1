@@ -297,6 +297,16 @@ emailLogado=email;
     msg.textContent='E-mail ou senha incorretos.';
     return;
   }
+  /* Corrige os dados antigos que foram vinculados ao e-mail errado */
+const chaveErrada=baseKey+'_'+encodeURIComponent('regi.luiz@hotmail.com');
+const chaveCerta=baseKey+'_'+encodeURIComponent('personalsrluiz@gmail.com');
+
+if(email==='personalsrluiz@gmail.com' &&
+   !localStorage.getItem(chaveCerta) &&
+   localStorage.getItem(chaveErrada)){
+  localStorage.setItem(chaveCerta,localStorage.getItem(chaveErrada));
+  localStorage.removeItem(chaveErrada);
+}
 const dadosAntigos=localStorage.getItem(baseKey);
 const dadosUsuario=localStorage.getItem(chaveUsuario);
 
