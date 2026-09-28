@@ -156,7 +156,13 @@ function render(){
       'Digite seu e-mail e sua senha.';
     return;
   }
+const usuario = JSON.parse(localStorage.getItem('mcf_usuario'));
 
+if (!usuario || email !== usuario.email || senha !== usuario.senha) {
+  document.getElementById('loginMsg').textContent =
+    'E-mail ou senha incorretos.';
+  return;
+}
   document.getElementById('login').style.display = 'none';
   document.getElementById('app').style.display = 'block';
 
