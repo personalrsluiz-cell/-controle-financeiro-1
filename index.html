@@ -481,11 +481,7 @@ function entrar(){
      SEM SOBRESCREVER DADOS
   ========================= */
 
-  const chavesAntigas=[
-    baseKey,
-    baseKey+'_'+
-      encodeURIComponent('regi.luiz@hotmail.com')
-  ];
+  const chavesAntigas=[];
 
   let dadosUsuario=JSON.parse(
     localStorage.getItem(chaveUsuario) ||
