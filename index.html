@@ -1,256 +1,86 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Meu Controle Financeiro</title>
-
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #f3f4f6;
-      color: #222;
-    }
-
-    header {
-      background: #111827;
-      color: white;
-      padding: 25px 20px;
-      text-align: center;
-    }
-
-    header h1 {
-      margin: 0;
-      font-size: 26px;
-    }
-
-    .container {
-      max-width: 900px;
-      margin: 25px auto;
-      padding: 0 15px;
-    }
-
-    .cards {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 15px;
-    }
-
-    .card {
-      background: white;
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-    }
-
-    .card h3 {
-      margin-top: 0;
-      font-size: 15px;
-      color: #666;
-    }
-
-    .valor {
-      font-size: 24px;
-      font-weight: bold;
-    }
-
-    .formulario {
-      background: white;
-      padding: 20px;
-      border-radius: 12px;
-      margin-top: 20px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-    }
-
-    input, select, button {
-      width: 100%;
-      padding: 12px;
-      margin-top: 8px;
-      margin-bottom: 12px;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-      box-sizing: border-box;
-      font-size: 16px;
-    }
-
-    button {
-      background: #111827;
-      color: white;
-      border: none;
-      cursor: pointer;
-      font-weight: bold;
-    }
-
-    button:hover {
-      background: #374151;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 20px;
-      background: white;
-      border-radius: 12px;
-      overflow: hidden;
-    }
-
-    th, td {
-      padding: 12px;
-      border-bottom: 1px solid #eee;
-      text-align: left;
-    }
-
-    th {
-      background: #111827;
-      color: white;
-    }
-
-    .entrada {
-      color: green;
-      font-weight: bold;
-    }
-
-    .saida {
-      color: red;
-      font-weight: bold;
-    }
-
-    @media (max-width: 700px) {
-      .cards {
-        grid-template-columns: 1fr;
-      }
-
-      table {
-        font-size: 14px;
-      }
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Meu Controle Financeiro</title>
+<style>
+:root{--bg:#111315;--card:#1b1e21;--card2:#24282c;--text:#f4f5f6;--muted:#9da4aa;--green:#35d07f;--red:#ff5c5c;--yellow:#f4c95d;--line:#30353a}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,Arial,sans-serif}
+.app{max-width:1150px;margin:auto;padding:24px}.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:22px}
+.brand h1{margin:0;font-size:25px}.brand span{color:var(--muted);font-size:13px}
+button{border:0;border-radius:10px;padding:11px 15px;background:var(--green);color:#07120c;font-weight:800;cursor:pointer}
+nav{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}nav button{background:var(--card2);color:var(--text)}nav button.active{background:var(--green);color:#07120c}
+.page{display:none}.page.active{display:block}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px}.label{color:var(--muted);font-size:13px}.value{font-size:25px;font-weight:800;margin-top:8px}.green{color:var(--green)}.red{color:var(--red)}.yellow{color:var(--yellow)}
+.section{margin-top:18px}.section h2{font-size:17px;margin:0 0 12px}.two{display:grid;grid-template-columns:1.3fr .7fr;gap:14px}
+table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:12px 8px;border-bottom:1px solid var(--line);font-size:14px}th{color:var(--muted);font-weight:600}
+form{display:grid;gap:12px}input,select{width:100%;padding:12px;background:#121416;border:1px solid var(--line);border-radius:10px;color:var(--text)}
+.formgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.actions{display:flex;gap:8px}
+.bar{height:9px;background:#30353a;border-radius:10px;overflow:hidden}.bar i{display:block;height:100%;background:var(--green)}
+.empty{color:var(--muted);padding:20px 0;text-align:center}
+@media(max-width:800px){.grid{grid-template-columns:1fr 1fr}.two{grid-template-columns:1fr}}@media(max-width:500px){.app{padding:15px}.grid{grid-template-columns:1fr}.formgrid{grid-template-columns:1fr}.top{align-items:flex-start;gap:10px;flex-direction:column}}
+</style>
 </head>
-
 <body>
+<div class="app">
+<header class="top"><div class="brand"><h1>💰 Meu Controle Financeiro</h1><span>Planeje hoje. Gaste melhor amanhã.</span></div><button onclick="show('lancar')">+ Lançamento</button></header>
+<nav id="nav">
+<button class="active" onclick="show('inicio')">Início</button><button onclick="show('lancar')">Lançamentos</button><button onclick="show('contas')">Contas</button><button onclick="show('cartoes')">Cartões</button><button onclick="show('metas')">Metas</button><button onclick="show('relatorios')">Relatórios</button>
+</nav>
 
-<header>
-  <h1>💰 Meu Controle Financeiro</h1>
-  <p>Organize suas entradas e despesas</p>
-</header>
-
-<div class="container">
-
-  <div class="cards">
-    <div class="card">
-      <h3>Saldo</h3>
-      <div class="valor" id="saldo">R$ 0,00</div>
-    </div>
-
-    <div class="card">
-      <h3>Entradas</h3>
-      <div class="valor entrada" id="entradas">R$ 0,00</div>
-    </div>
-
-    <div class="card">
-      <h3>Despesas</h3>
-      <div class="valor saida" id="despesas">R$ 0,00</div>
-    </div>
-  </div>
-
-  <div class="formulario">
-    <h2>Adicionar movimentação</h2>
-
-    <input type="text" id="descricao" placeholder="Descrição">
-
-    <input type="number" id="valor" placeholder="Valor" step="0.01">
-
-    <select id="tipo">
-      <option value="entrada">Entrada</option>
-      <option value="saida">Despesa</option>
-    </select>
-
-    <button onclick="adicionar()">Adicionar</button>
-  </div>
-
-  <h2>Movimentações</h2>
-
-  <table>
-    <thead>
-      <tr>
-        <th>Descrição</th>
-        <th>Tipo</th>
-        <th>Valor</th>
-      </tr>
-    </thead>
-
-    <tbody id="lista"></tbody>
-  </table>
-
+<section id="inicio" class="page active">
+<div class="grid">
+<div class="card"><div class="label">Saldo</div><div class="value" id="saldo">R$ 0,00</div></div>
+<div class="card"><div class="label">Entradas</div><div class="value green" id="entradas">R$ 0,00</div></div>
+<div class="card"><div class="label">Despesas</div><div class="value red" id="despesas">R$ 0,00</div></div>
+<div class="card"><div class="label">Contas pendentes</div><div class="value yellow" id="pendentes">R$ 0,00</div></div>
 </div>
+<div class="two section"><div class="card"><h2>Últimos lançamentos</h2><div id="recent"></div></div><div class="card"><h2>Resumo por categoria</h2><div id="cats"></div></div></div>
+</section>
 
+<section id="lancar" class="page">
+<div class="card"><h2>Novo lançamento</h2><form id="formLanc">
+<div class="formgrid"><select id="tipo"><option value="entrada">Entrada</option><option value="despesa">Despesa</option></select><input id="desc" placeholder="Descrição" required></div>
+<div class="formgrid"><input id="valor" type="number" step="0.01" min="0" placeholder="Valor (R$)" required><input id="data" type="date" required></div>
+<div class="formgrid"><select id="cat"><option>Moradia</option><option>Alimentação</option><option>Transporte</option><option>Lazer</option><option>Saúde</option><option>Educação</option><option>Compras</option><option>Trabalho</option><option>Outros</option></select><select id="pag"><option>Pix</option><option>Débito</option><option>Crédito</option><option>Dinheiro</option></select></div>
+<button>Salvar lançamento</button></form></div>
+<div class="card section"><h2>Histórico</h2><div id="history"></div></div>
+</section>
+
+<section id="contas" class="page"><div class="card"><h2>Contas a pagar</h2><form id="formConta"><div class="formgrid"><input id="contaDesc" placeholder="Ex.: Internet" required><input id="contaValor" type="number" step=".01" placeholder="Valor" required></div><div class="formgrid"><input id="contaData" type="date" required><select id="contaStatus"><option value="pendente">Pendente</option><option value="pago">Pago</option></select></div><button>Adicionar conta</button></form></div><div class="card section" id="listaContas"></div></section>
+
+<section id="cartoes" class="page"><div class="card"><h2>Cartões</h2><form id="formCartao"><div class="formgrid"><input id="cartaoNome" placeholder="Nome do cartão" required><input id="cartaoLimite" type="number" step=".01" placeholder="Limite" required></div><button>Adicionar cartão</button></form></div><div class="card section" id="listaCartoes"></div></section>
+
+<section id="metas" class="page"><div class="card"><h2>Metas financeiras</h2><form id="formMeta"><div class="formgrid"><input id="metaNome" placeholder="Ex.: Carro" required><input id="metaAlvo" type="number" step=".01" placeholder="Valor da meta" required></div><div class="formgrid"><input id="metaAtual" type="number" step=".01" placeholder="Já guardado" value="0"><input id="metaPrazo" type="date"></div><button>Criar meta</button></form></div><div class="section" id="listaMetas"></div></section>
+
+<section id="relatorios" class="page"><div class="grid"><div class="card"><div class="label">Taxa de economia</div><div class="value" id="taxa">0%</div></div><div class="card"><div class="label">Maior categoria</div><div class="value" id="maior">—</div></div></div><div class="card section"><h2>Despesas por categoria</h2><div id="relCats"></div></div></section>
+</div>
 <script>
-
-let movimentacoes = [];
-
-function adicionar() {
-
-  const descricao = document.getElementById("descricao").value;
-  const valor = parseFloat(document.getElementById("valor").value);
-  const tipo = document.getElementById("tipo").value;
-
-  if (!descricao || !valor) {
-    alert("Preencha a descrição e o valor.");
-    return;
-  }
-
-  movimentacoes.push({
-    descricao: descricao,
-    valor: valor,
-    tipo: tipo
-  });
-
-  document.getElementById("descricao").value = "";
-  document.getElementById("valor").value = "";
-
-  atualizar();
+const key='mcf_data_v1';
+let db=JSON.parse(localStorage.getItem(key)||'{"lanc":[],"contas":[],"cartoes":[],"metas":[]}');
+const money=v=>new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(v||0);
+const save=()=>{localStorage.setItem(key,JSON.stringify(db));render()};
+function show(id){document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));document.getElementById(id).classList.add('active');document.querySelectorAll('nav button').forEach(x=>x.classList.remove('active'));[...document.querySelectorAll('nav button')].find(x=>x.textContent.toLowerCase().includes(id==='inicio'?'início':id)).classList.add('active');render()}
+function render(){
+ let ent=db.lanc.filter(x=>x.tipo==='entrada').reduce((a,x)=>a+x.valor,0), des=db.lanc.filter(x=>x.tipo==='despesa').reduce((a,x)=>a+x.valor,0);
+ let pend=db.contas.filter(x=>x.status==='pendente').reduce((a,x)=>a+x.valor,0);
+ saldo.textContent=money(ent-des);entradas.textContent=money(ent);despesas.textContent=money(des);pendentes.textContent=money(pend);
+ const rows=db.lanc.slice(-8).reverse().map(x=>`<tr><td>${x.data}</td><td>${x.desc}</td><td>${x.cat}</td><td class="${x.tipo==='entrada'?'green':'red'}">${x.tipo==='entrada'?'+':'-'} ${money(x.valor)}</td></tr>`).join('');
+ recent.innerHTML=rows?`<table><tr><th>Data</th><th>Descrição</th><th>Categoria</th><th>Valor</th></tr>${rows}</table>`:'<div class="empty">Nenhum lançamento ainda.</div>';
+ history.innerHTML=db.lanc.length?`<table><tr><th>Data</th><th>Descrição</th><th>Tipo</th><th>Valor</th></tr>${db.lanc.slice().reverse().map(x=>`<tr><td>${x.data}</td><td>${x.desc}</td><td>${x.tipo}</td><td class="${x.tipo==='entrada'?'green':'red'}">${money(x.valor)}</td></tr>`).join('')}</table>`:'<div class="empty">Cadastre seu primeiro lançamento.</div>';
+ let c={};db.lanc.filter(x=>x.tipo==='despesa').forEach(x=>c[x.cat]=(c[x.cat]||0)+x.valor);let total=Object.values(c).reduce((a,b)=>a+b,0);
+ cats.innerHTML=Object.entries(c).sort((a,b)=>b[1]-a[1]).map(([n,v])=>`<p><b>${n}</b> — ${money(v)}<div class="bar"><i style="width:${total?v/total*100:0}%"></i></div></p>`).join('')||'<div class="empty">Sem despesas.</div>';
+ relCats.innerHTML=cats.innerHTML;let mx=Object.entries(c).sort((a,b)=>b[1]-a[1])[0];maior.textContent=mx?mx[0]:'—';taxa.textContent=ent?((ent-des)/ent*100).toFixed(1)+'%':'0%';
+ listaContas.innerHTML=db.contas.length?`<table><tr><th>Conta</th><th>Valor</th><th>Vencimento</th><th>Status</th></tr>${db.contas.map(x=>`<tr><td>${x.desc}</td><td>${money(x.valor)}</td><td>${x.data}</td><td class="${x.status==='pago'?'green':'yellow'}">${x.status}</td></tr>`).join('')}</table>`:'<div class="empty">Nenhuma conta cadastrada.</div>';
+ listaCartoes.innerHTML=db.cartoes.length?db.cartoes.map(x=>`<div style="margin:15px 0"><b>💳 ${x.nome}</b><div class="label">Limite: ${money(x.limite)}</div></div>`).join(''):'<div class="empty">Nenhum cartão cadastrado.</div>';
+ listaMetas.innerHTML=db.metas.length?db.metas.map(x=>{let p=Math.min(100,x.atual/x.alvo*100);return `<div class="card" style="margin-bottom:12px"><b>🎯 ${x.nome}</b><div class="label">${money(x.atual)} de ${money(x.alvo)} ${x.prazo?'· prazo '+x.prazo:''}</div><div class="bar" style="margin-top:10px"><i style="width:${p}%"></i></div><div class="label" style="margin-top:6px">${p.toFixed(0)}% concluído</div></div>`}).join(''):'<div class="card empty">Crie sua primeira meta.</div>';
 }
-
-function atualizar() {
-
-  let entradas = 0;
-  let despesas = 0;
-
-  const lista = document.getElementById("lista");
-
-  lista.innerHTML = "";
-
-  movimentacoes.forEach(item => {
-
-    if (item.tipo === "entrada") {
-      entradas += item.valor;
-    } else {
-      despesas += item.valor;
-    }
-
-    const linha = document.createElement("tr");
-
-    linha.innerHTML = `
-      <td>${item.descricao}</td>
-      <td>${item.tipo === "entrada" ? "Entrada" : "Despesa"}</td>
-      <td>R$ ${item.valor.toFixed(2).replace(".", ",")}</td>
-    `;
-
-    lista.appendChild(linha);
-  });
-
-  document.getElementById("entradas").innerText =
-    "R$ " + entradas.toFixed(2).replace(".", ",");
-
-  document.getElementById("despesas").innerText =
-    "R$ " + despesas.toFixed(2).replace(".", ",");
-
-  document.getElementById("saldo").innerText =
-    "R$ " + (entradas - despesas).toFixed(2).replace(".", ",");
-}
-
+document.getElementById('formLanc').onsubmit=e=>{e.preventDefault();db.lanc.push({tipo:tipo.value,desc:desc.value,valor:+valor.value,data:data.value,cat:cat.value,pag:pag.value});e.target.reset();data.value=new Date().toISOString().slice(0,10);save()};
+document.getElementById('formConta').onsubmit=e=>{e.preventDefault();db.contas.push({desc:contaDesc.value,valor:+contaValor.value,data:contaData.value,status:contaStatus.value});e.target.reset();save()};
+document.getElementById('formCartao').onsubmit=e=>{e.preventDefault();db.cartoes.push({nome:cartaoNome.value,limite:+cartaoLimite.value});e.target.reset();save()};
+document.getElementById('formMeta').onsubmit=e=>{e.preventDefault();db.metas.push({nome:metaNome.value,alvo:+metaAlvo.value,atual:+metaAtual.value,prazo:metaPrazo.value});e.target.reset();save()};
+data.value=new Date().toISOString().slice(0,10);render();
 </script>
-
 </body>
 </html>
