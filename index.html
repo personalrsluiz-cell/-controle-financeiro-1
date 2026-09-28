@@ -203,9 +203,21 @@ function criarConta(){
   const usuarios=JSON.parse(localStorage.getItem('mcf_usuarios')||'{}');
 
   if(usuarios[email]){
-    msg.textContent='Este e-mail já possui uma conta.';
-    return;
-  }
+  usuarios[email].senha=senha;
+
+  localStorage.setItem(
+    'mcf_usuarios',
+    JSON.stringify(usuarios)
+  );
+
+  msg.textContent='Senha atualizada com sucesso!';
+
+  setTimeout(()=>{
+    msg.textContent='Agora você pode entrar com seus dados.';
+  },1500);
+
+  return;
+}
 
   usuarios[email]={
     email:email,
