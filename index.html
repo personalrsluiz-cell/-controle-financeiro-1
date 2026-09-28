@@ -129,12 +129,21 @@ form{display:grid;gap:12px}input,select{width:100%;padding:12px;background:#1214
 <section id="relatorios" class="page"><div class="grid"><div class="card"><div class="label">Taxa de economia</div><div class="value" id="taxa">0%</div></div><div class="card"><div class="label">Maior categoria</div><div class="value" id="maior">—</div></div></div><div class="card section"><h2>Despesas por categoria</h2><div id="relCats"></div></div></section>
 </div>
 <script>
-const key='mcf_data_v1';
-let db=JSON.parse(localStorage.getItem(key)||'{"lanc":[],"contas":[],"cartoes":[],"metas":[]}');
+const baseKey='mcf_data_v1';
+const usuarioAtual=()=>JSON.parse(localStorage.getItem('mcf_usuario')||'null');
+const dataKey=()=>{
+  const u=usuarioAtual();
+  return u?.email ? baseKey+'_'+encodeURIComponent(u.email.trim().toLowerCase()) : baseKey;
+};
+
+let db=JSON.parse(localStorage.getItem(dataKey())||'{"lanc":[],"contas":[],"cartoes":[],"metas":[]}');
+
 const money=v=>new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(v||0);
-const save=()=>{localStorage.setItem(key,JSON.stringify(db));render()};
-function show(id){document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));document.getElementById(id).classList.add('active');document.querySelectorAll('nav button').forEach(x=>x.classList.remove('active'));[...document.querySelectorAll('nav button')].find(x=>x.textContent.toLowerCase().includes(id==='inicio'?'início':id)).classList.add('active');render()}
-function render(){
+
+const save=()=>{
+  localStorage.setItem(dataKey(),JSON.stringify(db));
+  render()
+};
  let ent=db.lanc.filter(x=>x.tipo==='entrada').reduce((a,x)=>a+x.valor,0), des=db.lanc.filter(x=>x.tipo==='despesa').reduce((a,x)=>a+x.valor,0);
  let pend=db.contas.filter(x=>x.status==='pendente').reduce((a,x)=>a+x.valor,0);
  saldo.textContent=money(ent-des);entradas.textContent=money(ent);despesas.textContent=money(des);pendentes.textContent=money(pend);
