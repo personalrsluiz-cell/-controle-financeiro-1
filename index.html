@@ -297,7 +297,13 @@ emailLogado=email;
     msg.textContent='E-mail ou senha incorretos.';
     return;
   }
+const dadosAntigos=localStorage.getItem(baseKey);
+const dadosUsuario=localStorage.getItem(chaveUsuario);
 
+if(!dadosUsuario && dadosAntigos){
+  localStorage.setItem(chaveUsuario,dadosAntigos);
+  localStorage.removeItem(baseKey);
+}
   /*
    * Carrega somente os dados financeiros deste usuário.
    */
