@@ -167,6 +167,34 @@ document.getElementById('formConta').onsubmit=e=>{e.preventDefault();db.contas.p
 document.getElementById('formCartao').onsubmit=e=>{e.preventDefault();db.cartoes.push({nome:cartaoNome.value,limite:+cartaoLimite.value});e.target.reset();save()};
 document.getElementById('formMeta').onsubmit=e=>{e.preventDefault();db.metas.push({nome:metaNome.value,alvo:+metaAlvo.value,atual:+metaAtual.value,prazo:metaPrazo.value});e.target.reset();save()};
 data.value=new Date().toISOString().slice(0,10);render();
+textContent =
+        'Conta criada com sucesso!';
+function criarConta(){
+    const email = document.getElementById('loginEmail').value.trim();
+    const senha = document.getElementById('loginPassword').value.trim();
+    const msg = document.getElementById('loginMsg');
+
+    if(!email || !senha){
+        msg.textContent = 'Digite seu e-mail e sua senha para criar a conta.';
+        return;
+    }
+
+    if(senha.length < 6){
+        msg.textContent = 'A senha deve ter pelo menos 6 caracteres.';
+        return;
+    }
+
+    localStorage.setItem('mcf_usuario', JSON.stringify({
+        email: email,
+        senha: senha
+    }));
+
+    msg.textContent = 'Conta criada com sucesso!';
+
+    setTimeout(() => {
+        msg.textContent = 'Agora você pode entrar com seus dados.';
+    }, 1500);
+}
 </script>
 </body>
 </html>
