@@ -280,16 +280,27 @@ function entrar(){
    * Recupera a conta antiga do usuário principal,
    * caso os dados financeiros já existam.
    */
-  const chaveUsuario=baseKey+'_'+encodeURIComponent(email);
-emailLogado=email;
-  if(!usuarios[email] && localStorage.getItem(chaveUsuario)){
-    usuarios[email]={
-      email:email,
-      senha:senha
-    };
+  const emailNormalizado=email.trim().toLowerCase();
+const chaveUsuario=baseKey+'_'+encodeURIComponent(emailNormalizado);
+emailLogado=emailNormalizado;
 
-    localStorage.setItem('mcf_usuarios',JSON.stringify(usuarios));
-  }
+/* Migra os dados que ficaram vinculados ao e-mail antigo */
+const chaveEmailAntigo=baseKey+'_'+encodeURIComponent('regi.luiz@hotmail.com');
+const dadosEmailAntigo=localStorage.getItem(chaveEmailAntigo);
+
+if(emailNormalizado==='personalsrluiz@gmail.com' && dadosEmailAntigo){
+  localStorage.setItem(chaveUsuario,dadosEmailAntigo);
+}
+
+if(!usuarios[emailNormalizado] &&
+localStorage.getItem(chaveUsuario)){
+  usuarios[emailNormalizado]={
+    email:emailNormalizado,
+    senha:senha
+  };
+}
+
+localStorage.setItem('mcf_usuarios',JSON.stringify(usuarios));
 
   const usuario=usuarios[email];
 
