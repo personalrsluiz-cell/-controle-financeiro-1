@@ -168,7 +168,37 @@ const save=()=>{
   );
   render();
 };
+function show(id){
+  document.querySelectorAll('.page').forEach(p=>{
+    p.classList.remove('active');
+  });
 
+  const pagina=document.getElementById(id);
+
+  if(pagina){
+    pagina.classList.add('active');
+  }
+
+  document.querySelectorAll('#nav button').forEach(b=>{
+    b.classList.remove('active');
+  });
+
+  const botoes=document.querySelectorAll('#nav button');
+
+  botoes.forEach(b=>{
+    if(b.getAttribute('onclick')===`show('${id}')`){
+      b.classList.add('active');
+    }
+  });
+
+  window.scrollTo({
+    top:0,
+    behavior:'smooth'
+  });
+
+  render();
+}
+  
 function render(){
 
   let ent=db.lanc
